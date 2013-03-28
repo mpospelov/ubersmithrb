@@ -32,7 +32,7 @@ unless result.error?
 end
 ```
 
-== Example Order Queue Workflow
+### Example Order Queue Workflow
 
 Ubersmith has a very flexible and configurable workflow for managing order processing. This
 example shows the basics of putting a full order through a queue.

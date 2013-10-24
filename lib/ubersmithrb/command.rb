@@ -32,12 +32,16 @@ module Ubersmith
       resp = nil
       begin
         a = args.first
-        puts "#{cmd}(#{a.inspect})"
+#        puts "#{cmd}(#{a.inspect})"
         page = (a.nil?) ? @agent.get(cmd) : @agent.post(cmd, a)
-        puts "#{page.content}"
+#        puts "#{page.content}"
         resp = Ubersmith::Response.new(JSON.parse(page.content))
       rescue Exception => e
-        resp = Ubersmith::Response.new({'status' => false, 'error_code' => 500, 'error_message' => e.message})
+        if page.content.include?("PDF")
+          resp = Ubersmith::Response.new({'status' => true, 'data' => page.content})
+        else
+          resp = Ubersmith::Response.new({'status' => false, 'error_code' => 500, 'error_message' => e.message})
+        end
       end
       resp
     end

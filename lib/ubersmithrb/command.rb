@@ -37,7 +37,7 @@ module Ubersmith
 #        puts "#{page.content}"
         resp = Ubersmith::Response.new(JSON.parse(page.content))
       rescue Exception => e
-        if page.content.include?("PDF")
+        if !page.nil? and !page.content.nil? and page.content.include?("PDF")
           resp = Ubersmith::Response.new({'status' => true, 'data' => page.content})
         else
           resp = Ubersmith::Response.new({'status' => false, 'error_code' => 500, 'error_message' => e.message})

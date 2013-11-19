@@ -39,6 +39,8 @@ module Ubersmith
       rescue Exception => e
         if !page.nil? and !page.content.nil? and page.content.include?("PDF")
           resp = Ubersmith::Response.new({'status' => true, 'data' => page.content})
+        elsif !page.nil? and !page.content.nil? and page.content.include?("HTML")
+          resp = Ubersmith::Response.new({'status' => true, 'data' => page.content})
         else
           resp = Ubersmith::Response.new({'status' => false, 'error_code' => 500, 'error_message' => e.message})
         end

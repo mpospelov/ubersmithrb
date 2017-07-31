@@ -14,6 +14,7 @@ module Ubersmith
       @user = user
       @token = token
       @agent = Mechanize.new
+      @agent.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
 
     # Returns a formatted API command call URL.
@@ -23,7 +24,7 @@ module Ubersmith
 
     # This class uses method_missing for handling delegation to the API method.
     # When making a call from this class call the method as you would a normal
-    # ruby method. Parameters passed should be a hash of all the fields to 
+    # ruby method. Parameters passed should be a hash of all the fields to
     # send to the API. Consult the ubersmith API docs for the necessary fields
     # for each API call.
     def method_missing(sym, *args)

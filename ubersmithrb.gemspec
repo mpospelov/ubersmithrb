@@ -12,10 +12,10 @@ Gem::Specification.new do |gem|
   gem.summary       = %q{This gem allows a programmer to connect and send commands to an Ubersmith server from their own application.}
   gem.homepage      = "https://github.com/mchkennedy/ubersmithrb"
   gem.has_rdoc      = true
-  gem.add_development_dependency  'rspec', '~> 2.5'
-  gem.add_development_dependency  'simplecov', '~> 0.7.1'
-  gem.add_runtime_dependency 'mechanize', '>= 2.5.1'
-  gem.add_runtime_dependency 'json', '>= 1.5.4'
+  gem.add_development_dependency  'rspec', '~> 3.8.0'
+  gem.add_development_dependency  'byebug', '~> 11.0.1'
+  gem.add_development_dependency  'simplecov', '~> 0.17.0'
+  gem.add_runtime_dependency 'oj', '>= 3.9.0'
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }

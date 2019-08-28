@@ -1,9 +1,8 @@
-require 'mechanize'
-require 'json'
+require 'net/http'
+require 'oj'
 require 'ubersmithrb/response'
 
 module Ubersmith
-
   # This class is the command handler for sending API commands and processing the
   # response. Each instance of the handler is given a module name and method calls
   # made to instances of this class will then be delegated to that API module.
@@ -13,13 +12,27 @@ module Ubersmith
       @url = url
       @user = user
       @token = token
-      @agent = Mechanize.new
-      @agent.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
 
     # Returns a formatted API command call URL.
-    def command_url(cmd)
-      "#{@url}?method=#{@modname.to_s}.#{cmd}"
+    def command_uri(cmd)
+      URI("#{@url}?method=#{@modname.to_s}.#{cmd}")
+    end
+
+    def run_method(method_name, req_body = nil)
+      cmd = command_uri(method_name)
+      response = fetch(cmd, req_body)
+      if response.code_type == Net::HTTPOK
+        if response['Content-Type'] == 'application/json'
+          Ubersmith::Response.new(Oj.load(response.body))
+        else
+          Ubersmith::Response.new('status' => true, 'data' => response.body)
+        end
+      else
+        Ubersmith::Response.new('status' => false, 'error_code' => 500, 'error_message' => response.body)
+      end
+    rescue SystemCallError, Net::HTTPClientError => e
+      Ubersmith::Response.new('status' => false, 'error_code' => 500, 'error_message' => e.message)
     end
 
     # This class uses method_missing for handling delegation to the API method.
@@ -28,25 +41,23 @@ module Ubersmith
     # send to the API. Consult the ubersmith API docs for the necessary fields
     # for each API call.
     def method_missing(sym, *args)
-      cmd = command_url(sym)
-      @agent.add_auth(cmd, @user, @token)
-      resp = nil
-      begin
-        a = args.first
-#        puts "#{cmd}(#{a.inspect})"
-        page = (a.nil?) ? @agent.get(cmd) : @agent.post(cmd, a)
-#        puts "#{page.content}"
-        resp = Ubersmith::Response.new(JSON.parse(page.content))
-      rescue Exception => e
-        if !page.nil? and !page.content.nil? and page.content.include?("PDF")
-          resp = Ubersmith::Response.new({'status' => true, 'data' => page.content})
-        elsif !page.nil? and !page.content.nil? and page.content.include?("HTML")
-          resp = Ubersmith::Response.new({'status' => true, 'data' => page.content})
-        else
-          resp = Ubersmith::Response.new({'status' => false, 'error_code' => 500, 'error_message' => e.message})
-        end
+      self.class.define_method(sym) { |req_body = nil| run_method(sym, req_body) }
+      public_send(sym, *args)
+    end
+
+    private
+
+    def fetch(cmd, req_body)
+      request = if req_body.nil?
+        Net::HTTP::Get.new(cmd)
+      else
+        Net::HTTP::Post.new(cmd).tap { |r| r.set_form_data(req_body) }
       end
-      resp
+      request.basic_auth(@user, @token)
+      Net::HTTP.start(cmd.hostname, cmd.port) do |http|
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        http.request(request)
+      end
     end
   end
 end

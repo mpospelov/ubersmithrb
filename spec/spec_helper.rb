@@ -1,4 +1,4 @@
-
+require 'byebug'
 require 'simplecov'
 SimpleCov.start
 
@@ -6,7 +6,6 @@ require 'rspec'
 require 'ubersmithrb'
 
 RSpec.configure do |config|
-  config.color_enabled  = true
   config.formatter      = 'documentation'
   unless File.exists?('spec/config.yml')
     puts "Missing config.yml"

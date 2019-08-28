@@ -4,7 +4,9 @@ module Ubersmith
   # This class represents a response from the API. It maintains the result status
   # and any error codes and messages in addition to the data portion of the API response.
   class Response
-    def initialize(raw = {'status' => false, 'error_code' => '999', 'error_message' => 'No response'})
+    NO_RESPONSE = {'status' => false, 'error_code' => '999', 'error_message' => 'No response'}.freeze
+
+    def initialize(raw = NO_RESPONSE)
       @response = raw
     end
 
@@ -27,7 +29,7 @@ module Ubersmith
     def error_code
       @response['error_code']
     end
-  
+
     # Returns the error message if one was given.
     def error_message
       @response['error_message']
@@ -40,7 +42,7 @@ module Ubersmith
       @response['data']
     end
 
-    # This class provides a convenience means via method_missing to delegate to the 
+    # This class provides a convenience means via method_missing to delegate to the
     # data results of the response so that the main object can be treated like the
     # data directly.
     def method_missing(sym, *args)

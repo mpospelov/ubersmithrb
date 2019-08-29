@@ -23,7 +23,7 @@ module Ubersmith
       cmd = command_uri(method_name)
       response = fetch(cmd, req_body)
       if response.code_type == Net::HTTPOK
-        if response['Content-Type'] == 'application/json'
+        if is_json?(response)
           Ubersmith::Response.new(Oj.load(response.body))
         else
           Ubersmith::Response.new('status' => true, 'data' => response.body)
@@ -46,6 +46,10 @@ module Ubersmith
     end
 
     private
+
+    def is_json?(response)
+      response['Content-Type'] == 'application/json'
+    end
 
     def fetch(cmd, req_body)
       request = if req_body.nil?
